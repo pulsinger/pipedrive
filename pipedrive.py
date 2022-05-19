@@ -16,7 +16,7 @@ def getData(limit,start=0):
        else:  
               data = content['data']
               for i in range(len(data)): 
-                     df = pd.DataFrame(data)
+                     df = pd.DataFrame(data)                                       # convert do pandas dataframe
                      df.to_csv("Data_"+df['name'][0]+".csv")                       # export each page to separate .csv
                             
               
