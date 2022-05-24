@@ -1,35 +1,23 @@
-api_pd_token = ''
-endpoint = 'organizations'
-
-def getData(limit,start=0):
+def getData(limit,start=0, df=pd.DataFrame()):
        
-       url_api = 'https://bbcsystems.pipedrive.com/v1/'+str(endpoint)+'?start='+str(start)+'&limit='+str(limit)+'&api_token='+str(api_pd_token)
+       url_api = 'https://bbcsystems.pipedrive.com/v1/'+str(endpoint)+'?start='+str(start)+'&limit='+str(limit)+'&api_token='+str(api_pd_token)                   # creating url string
               
        res = requests.get(url_api)               # response
        content = json.loads(res.content)         # convert JSON response to python DICT
 
-       data=[]                                   # create empty list
-       
-
        if len(content['data']) == 0:
-              print("No more data")
+              print("No data present")
        else:  
-              data = content['data']
-              for i in range(len(data)): 
-                     df = pd.DataFrame(data)                                       # convert do pandas dataframe
-                     df.to_csv("Data_"+df['name'][0]+".csv")                       # export each page to separate .csv
-                            
-              
-              #print(df['name'][0])
-              print(len(data))
-              print(url_api)
-              #df = pd.DataFrame(data)
-              
+              data = content['data']                                                                                                 # use only data field as dataframe
+                                                      
+              temp_df = pd.DataFrame(data)                                                                                           # create first dataframe to append to
+              df = df.append(temp_df,ignore_index=True)                                                                              # appending new dataframe for each request                     
+                       
+              #df.to_csv("Data_test.csv",mode='a',index=False,header=False) 
+                                                                                                     
               if len(content['data']) >0 and content['additional_data']['pagination']['more_items_in_collection'] == True:
-                     data.append(getData(limit+500, content['additional_data']['pagination']['next_start']))                                               #  next start adds 500 automatically
+                    df = df.append(getData(limit+500, content['additional_data']['pagination']['next_start'],df))                              # next start adds 500 entries automatically and appends to dataframe
 
                   
-       
-       #print(len(df))
-
-       return df
+       return df                                  # return the appended dataframe
+             
